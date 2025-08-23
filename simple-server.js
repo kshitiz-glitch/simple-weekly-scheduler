@@ -439,11 +439,13 @@ function calculateDuration(startTime, endTime) {
     return end - start;
 }
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Simple Weekly Scheduler running on http://localhost:${PORT}`);
-    console.log(`📅 Open your browser and navigate to the URL above to start creating schedules!`);
-    console.log(`💡 This is a simplified interface that can be extended to use the full timetable generator backend.`);
-});
+// Start server (only in development)
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Simple Weekly Scheduler running on http://localhost:${PORT}`);
+        console.log(`📅 Open your browser and navigate to the URL above to start creating schedules!`);
+        console.log(`💡 This is a simplified interface that can be extended to use the full timetable generator backend.`);
+    });
+}
 
 module.exports = app;

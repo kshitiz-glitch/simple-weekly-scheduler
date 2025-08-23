@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "simple-server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/simple-server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/simple-scheduler.html"
+    }
+  ]
+}
