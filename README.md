@@ -115,6 +115,4 @@ src/
 - Node.js 16+
 - TypeScript 5+
 
-## License
 
-MIT
