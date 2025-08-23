@@ -77,3 +77,7 @@ MIT License
 ---
 
 **🎉 Ready for deployment!** The project is now properly configured for Vercel deployment.
+
+## 📄 License
+
+MIT License
