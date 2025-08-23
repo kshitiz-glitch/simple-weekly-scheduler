@@ -1,0 +1,13 @@
+Batch,Subject,Faculty,Lectures,Duration
+Grade 9A,Mathematics,Ms. Johnson,4,45
+Grade 9A,English,Mr. Smith,3,45
+Grade 9A,Science,Dr. Brown,3,45
+Grade 9A,History,Ms. Davis,2,45
+Grade 9B,Mathematics,Ms. Johnson,4,45
+Grade 9B,English,Mr. Wilson,3,45
+Grade 9B,Science,Dr. Brown,3,45
+Grade 9B,History,Ms. Davis,2,45
+Grade 10A,Advanced Math,Dr. Miller,4,45
+Grade 10A,Literature,Mr. Smith,3,45
+Grade 10A,Chemistry,Dr. Brown,3,45
+Grade 10A,World History,Ms. Davis,2,45

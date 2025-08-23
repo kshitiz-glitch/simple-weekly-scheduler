@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Weekly Scheduler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+        
+        .step-indicator {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .step-content {
+            padding: 30px;
+        }
+        
+        .step-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-secondary {
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+        
+        .schedule-grid {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .schedule-header {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+        }
+        
+        .time-slot {
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            min-height: 60px;
+            transition: all 0.3s ease;
+        }
+        
+        .time-slot:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .schedule-entry {
+            background: linear-gradient(45deg, #e3f2fd, #bbdefb);
+            border-radius: 8px;
+            padding: 8px;
+            margin: 2px 0;
+            font-size: 0.9em;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .alert-success {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            color: #155724;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+            color: #856404;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+        }
+        
+        .template-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .template-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+        
+        .subject-item, .faculty-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .step-content {
+                padding: 20px;
+            }
+            
+            .step-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <h2><i class="fas fa-calendar-alt me-2"></i>Simple Weekly Scheduler</h2>
+                <div class="progress mt-3" style="height: 8px;">
+                    <div class="progress-bar" id="progressBar" role="progressbar" style="width: 16.67%"></div>
+                </div>
+                <p class="mt-2 mb-0">Step <span id="currentStep">1</span> of 6: <span id="stepTitle">Institute Information</span></p>
+            </div>
+
+            <!-- Step Content -->
+            <div class="step-content">
+                <!-- Step 1: Institute Information -->
+                <div id="step1" class="step-section">
+                    <div class="step-card">
+                        <h4><i class="fas fa-university me-2"></i>Institute Information</h4>
+                        <p class="text-muted">Let's start by entering your institute's basic information.</p>
+                        
+                        <!-- Load Previous Data Section -->
+                        <div id="previousDataSection" class="alert alert-info" style="display: none;">
+                            <h6><i class="fas fa-history me-2"></i>Load Previous Data</h6>
+                            <p class="mb-2">Found previous data for this institute. Would you like to load it?</p>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-success" onclick="scheduler.loadPreviousData()">
+                                    <i class="fas fa-download me-1"></i>Load Previous Data
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="scheduler.startFresh()">
+                                    <i class="fas fa-plus me-1"></i>Start Fresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Saved Templates Section -->
+                        <div id="savedTemplatesSection" class="mb-4" style="display: none;">
+                            <h6><i class="fas fa-bookmark me-2"></i>Saved Templates</h6>
+                            <div class="row" id="templatesList"></div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="instituteName" class="form-label">Institute Name *</label>
+                                <input type="text" class="form-control" id="instituteName" placeholder="Enter institute name" required onblur="scheduler.checkForPreviousData()">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="academicYear" class="form-label">Academic Year</label>
+                                <input type="text" class="form-control" id="academicYear" placeholder="e.g., 2024-2025">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="contactEmail" class="form-label">Contact Email</label>
+                                <input type="email" class="form-control" id="contactEmail" placeholder="contact@institute.edu" onblur="scheduler.checkForPreviousData()">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contactPhone" class="form-label">Contact Phone</label>
+                                <input type="tel" class="form-control" id="contactPhone" placeholder="+1 (555) 123-4567">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                Next: Add Batches <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-info ms-2" onclick="scheduler.showSavedTemplates()" id="showTemplatesBtn" style="display: none;">
+                                <i class="fas fa-bookmark me-1"></i>View Saved Templates
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Batches -->
+                <div id="step2" class="step-section" style="display: none;">
+                    <div class="step-card">
+                        <h4><i class="fas fa-users me-2"></i>Batches/Classes</h4>
+                        <p class="text-muted">Add the batches or classes that need to be scheduled.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label for="batchName" class="form-label">Batch Name</label>
+                                <input type="text" class="form-control" id="batchName" placeholder="e.g., Grade 10A, CS-101, etc.">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="studentCount" class="form-label">Students (optional)</label>
+                                <input type="number" class="form-control" id="studentCount" placeholder="30">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-secondary" onclick="addBatch()">
+                                <i class="fas fa-plus me-2"></i>Add Batch
+                            </button>
+                        </div>
+                        
+                        <div id="batchesList" class="mt-4"></div>
+                        
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-2"></i>Previous
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep()" id="nextToBatches" disabled>
+                                Next: Add Subjects <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Subjects -->
+                <div id="step3" class="step-section" style="display: none;">
+                    <div class="step-card">
+                        <h4><i class="fas fa-book me-2"></i>Subjects</h4>
+                        <p class="text-muted">Add subjects for each batch with their lecture requirements.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="subjectBatch" class="form-label">Select Batch</label>
+                                <select class="form-select" id="subjectBatch">
+                                    <option value="">Choose batch...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="subjectName" class="form-label">Subject Name</label>
+                                <input type="text" class="form-control" id="subjectName" placeholder="e.g., Mathematics">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="lecturesPerWeek" class="form-label">Lectures/Week</label>
+                                <input type="number" class="form-control" id="lecturesPerWeek" min="1" max="10" value="3">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="lectureDuration" class="form-label">Duration (min)</label>
+                                <input type="number" class="form-control" id="lectureDuration" min="30" max="180" value="60">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-secondary" onclick="addSubject()">
+                                <i class="fas fa-plus me-2"></i>Add Subject
+                            </button>
+                        </div>
+                        
+                        <div id="subjectsList" class="mt-4"></div>
+                        
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-2"></i>Previous
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep()" id="nextToFaculty" disabled>
+                                Next: Add Faculty <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Faculty -->
+                <div id="step4" class="step-section" style="display: none;">
+                    <div class="step-card">
+                        <h4><i class="fas fa-chalkboard-teacher me-2"></i>Faculty</h4>
+                        <p class="text-muted">Add faculty members and assign them to subjects.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="facultyName" class="form-label">Faculty Name</label>
+                                <input type="text" class="form-control" id="facultyName" placeholder="e.g., Dr. John Smith">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="facultyEmail" class="form-label">Email (optional)</label>
+                                <input type="email" class="form-control" id="facultyEmail" placeholder="john.smith@institute.edu">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="facultySubjects" class="form-label">Subjects</label>
+                                <select class="form-select" id="facultySubjects" multiple>
+                                </select>
+                                <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-secondary" onclick="addFaculty()">
+                                <i class="fas fa-plus me-2"></i>Add Faculty
+                            </button>
+                        </div>
+                        
+                        <div id="facultyList" class="mt-4"></div>
+                        
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-2"></i>Previous
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep()" id="nextToPreferences" disabled>
+                                Next: Set Preferences <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Preferences -->
+                <div id="step5" class="step-section" style="display: none;">
+                    <div class="step-card">
+                        <h4><i class="fas fa-cog me-2"></i>Scheduling Preferences</h4>
+                        <p class="text-muted">Configure your scheduling preferences and constraints.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Working Days</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="monday" checked>
+                                    <label class="form-check-label" for="monday">Monday</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="tuesday" checked>
+                                    <label class="form-check-label" for="tuesday">Tuesday</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="wednesday" checked>
+                                    <label class="form-check-label" for="wednesday">Wednesday</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="thursday" checked>
+                                    <label class="form-check-label" for="thursday">Thursday</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="friday" checked>
+                                    <label class="form-check-label" for="friday">Friday</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="saturday">
+                                    <label class="form-check-label" for="saturday">Saturday</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="startTime" class="form-label">Start Time</label>
+                                        <input type="time" class="form-control" id="startTime" value="08:00">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="endTime" class="form-label">End Time</label>
+                                        <input type="time" class="form-control" id="endTime" value="17:00">
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="lunchBreak" class="form-label">Lunch Break</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="time" class="form-control" id="lunchStart" value="12:00" placeholder="Start">
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="time" class="form-control" id="lunchEnd" value="13:00" placeholder="End">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="breakDuration" class="form-label">Break Between Classes (minutes)</label>
+                                    <input type="number" class="form-control" id="breakDuration" min="0" max="30" value="15">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-2"></i>Previous
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                Next: Generate Schedule <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Generate & Review -->
+                <div id="step6" class="step-section" style="display: none;">
+                    <div class="step-card">
+                        <h4><i class="fas fa-magic me-2"></i>Generate Schedule</h4>
+                        <p class="text-muted">Review your configuration and generate the weekly schedule.</p>
+                        
+                        <!-- Configuration Summary -->
+                        <div id="configSummary" class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Configuration Summary</h6>
+                            <div id="summaryContent"></div>
+                        </div>
+                        
+                        <!-- Generation Controls -->
+                        <div class="text-center mb-4">
+                            <button type="button" class="btn btn-primary btn-lg" onclick="generateSchedule()" id="generateBtn">
+                                <i class="fas fa-magic me-2"></i>Generate Weekly Schedule
+                            </button>
+                        </div>
+                        
+                        <!-- Loading Spinner -->
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Generating schedule...</span>
+                            </div>
+                            <p class="mt-3">Generating your weekly schedule...</p>
+                            <p class="text-muted">This may take a few moments</p>
+                        </div>
+                        
+                        <!-- Schedule Display -->
+                        <div id="scheduleDisplay" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5><i class="fas fa-calendar-week me-2"></i>Generated Weekly Schedule</h5>
+                                <div>
+                                    <button type="button" class="btn btn-outline-danger btn-sm me-2" onclick="exportSchedule('pdf')">
+                                        <i class="fas fa-file-pdf me-1"></i>Download PDF
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="exportSchedule('excel')">
+                                        <i class="fas fa-file-excel me-1"></i>Download Excel
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="schedule-grid">
+                                <div class="schedule-header">
+                                    <div class="row">
+                                        <div class="col-2">Time</div>
+                                        <div class="col-2">Monday</div>
+                                        <div class="col-2">Tuesday</div>
+                                        <div class="col-2">Wednesday</div>
+                                        <div class="col-2">Thursday</div>
+                                        <div class="col-2">Friday</div>
+                                    </div>
+                                </div>
+                                <div id="scheduleGrid"></div>
+                            </div>
+                            
+                            <!-- Schedule Statistics -->
+                            <div class="row mt-4">
+                                <div class="col-md-4">
+                                    <div class="alert alert-success">
+                                        <h6><i class="fas fa-check-circle me-2"></i>Schedule Statistics</h6>
+                                        <div id="scheduleStats"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-warning" id="conflictsAlert" style="display: none;">
+                                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Conflicts</h6>
+                                        <div id="conflictsList"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-lightbulb me-2"></i>Suggestions</h6>
+                                        <div id="suggestionsList"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-secondary me-2" onclick="prevStep()">
+                                <i class="fas fa-arrow-left me-2"></i>Previous
+                            </button>
+                            <button type="button" class="btn btn-info me-2" onclick="scheduler.saveAsTemplate()" id="saveTemplateBtn" style="display: none;">
+                                <i class="fas fa-save me-2"></i>Save as Template
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="startOver()" id="startOverBtn" style="display: none;">
+                                <i class="fas fa-redo me-2"></i>Create New Schedule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="simple-scheduler.js"></script>
+</body>
+</html>

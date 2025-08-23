@@ -1,0 +1,19 @@
+{
+  "holidays": [
+    {
+      "date": "2024-12-25",
+      "name": "Christmas Day",
+      "type": "national"
+    },
+    {
+      "date": "2024-01-01", 
+      "name": "New Year's Day",
+      "type": "national"
+    },
+    {
+      "date": "2024-07-04",
+      "name": "Independence Day", 
+      "type": "national"
+    }
+  ]
+}
