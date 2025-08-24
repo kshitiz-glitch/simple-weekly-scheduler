@@ -5,7 +5,8 @@
   "main": "simple-server.js",
   "scripts": {
     "start": "node simple-server.js",
-    "dev": "node simple-server.js"
+    "dev": "node simple-server.js",
+    "build": "echo 'No build step required'"
   },
   "keywords": [
     "schedule",

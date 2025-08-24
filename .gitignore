@@ -28,6 +28,9 @@ coverage/
 *.swo
 .kiro/
 
+# Render deployment files (keep render.yaml)
+# vercel.json (removed - using Render instead)
+
 # OS
 .DS_Store
 Thumbs.db
